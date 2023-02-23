@@ -1,0 +1,1368 @@
+//lib necessária para conectar o wifi
+#include <WiFi.h> 
+
+//led conectado no pino 23
+#define ledVerde 15
+
+//mensagem enviada pelo client (aplicativo)
+String ClientRequest;
+int ValSec=0, ValMin=0;
+int Pin1=5,Pin2=19,Pin3=14,Pin4=27,Pin5=26,Pin6=25,Pin7=33,Pin8=32,Pin9=21;
+
+//ip estático, o mesmo deve ser usado no app do smartphone
+IPAddress staticIP(192,168,57,202);
+//gateway, deixe aqui o gateway da rede em que está conectado
+IPAddress gateway(192,168,57,1);
+//máscara, deixe aqui a máscara da rede em que está conectado
+IPAddress subnet(255,255,255,0);
+
+//objeto do servidor
+WiFiServer server(80);
+
+//objeto do cliente
+WiFiClient client;
+
+//variável usada para obter o request do client 
+String myresultat;
+
+//função usada para a leitura do request sem caracteres de quebra de linha como "\n" ou "\r"
+String ReadIncomingRequest()
+{
+  //enquanto houver bytes enviados pelo client 
+  while(client.available()) 
+  {
+    //atribui para a variável String o comando enviado pelo cliente sem "\r"
+    ClientRequest = (client.readStringUntil('\r'));
+
+    //se existir "HTTP/1.1" na String então recebe comando, senão o comando não é aceito
+    //isso verifica que a solicitação seja HTTP/1.1
+    if ((ClientRequest.indexOf("HTTP/1.1")>0))
+      myresultat = ClientRequest;
+  }
+  //retorna variável
+  return myresultat;
+}
+
+void setup()
+{
+  //inicializa varíavel como vazia
+  ClientRequest = "";
+  
+  //define pino do led como saída
+  pinMode(ledVerde,OUTPUT);
+  pinMode(18,INPUT);
+
+  //inicializa serial com 115200 bits por segundo
+  Serial.begin(115200);
+  //aguarda 10ms
+  delay(10);
+
+  //A partir daqui conecta wifi
+  Serial.println("START");
+
+  //configura ssid e senha da rede
+  WiFi.begin("Microondas", "ifsp1234*");
+
+  //enquanto não conectar exibe "."
+  while (WiFi.status() != WL_CONNECTED)
+  {
+      delay(250);
+      Serial.print(".");
+
+
+  }
+
+  //exibe "conectado"
+  Serial.println("Connected");
+
+  //configura ip estático, gateway e máscara (definidos globais no início do código)
+  WiFi.config(staticIP, gateway, subnet);
+
+  //exibe ip utilizado pelo ESP
+  Serial.println("Your IP is");
+  Serial.println((WiFi.localIP()));
+
+  //inicializa servidor
+  server.begin();
+
+  
+  pinMode(Pin1,OUTPUT);
+pinMode(Pin2,OUTPUT);
+pinMode(Pin3,OUTPUT);
+pinMode(Pin4,OUTPUT);
+pinMode(Pin5,OUTPUT);
+pinMode(Pin6,OUTPUT);
+pinMode(Pin7,OUTPUT);
+pinMode(Pin8,OUTPUT);
+pinMode(Pin9,OUTPUT);
+digitalWrite(Pin1,LOW);
+digitalWrite(Pin2,HIGH);
+digitalWrite(Pin3,HIGH);
+digitalWrite(Pin4,HIGH);
+digitalWrite(Pin5,HIGH);
+digitalWrite(Pin6,HIGH);
+digitalWrite(Pin7,HIGH);
+digitalWrite(Pin8,HIGH);
+digitalWrite(Pin9,HIGH);
+}
+
+void loop()
+{
+    //obtém cliente
+    client = server.available();
+
+    //se ele for nulo, retorna até que ele realmente exista
+    if (!client) 
+      return; 
+
+    //enquanto não existir request aguarda
+    while(!client.available())
+      delay(1); 
+
+    //obtém request utilizando a função local ReadIncomingRequest
+    ClientRequest = (ReadIncomingRequest());
+    
+    //retira dados da página e obtém apenas o comando enviado
+    ClientRequest.remove(0, 5);
+    ClientRequest.remove(ClientRequest.length()-9,9);
+
+    Serial.println(ClientRequest);
+
+    int index_s = 0;
+if (ClientRequest.indexOf("%20s%20") != -1)
+  index_s = ClientRequest.indexOf("%20s%20");
+  if (ClientRequest.indexOf("%20S%20") != -1)
+  index_s = ClientRequest.indexOf("%20S%20");
+if (ClientRequest.indexOf("%20segundo") != -1)
+  index_s = ClientRequest.indexOf("%20segundo");
+  if (ClientRequest.indexOf("%20Segundo") != -1)
+  index_s = ClientRequest.indexOf("%20Segundo");
+
+  int index_min = 0;
+if (ClientRequest.indexOf("%20min") != -1){
+  index_min = ClientRequest.indexOf("%20min");}
+  
+int flag_identifica_texto = 1;
+
+
+
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+   if (index_s > 0){
+
+    if ((ClientRequest.indexOf("%201%20")!= -1)&&(ClientRequest.indexOf("%201%20") < index_s)&&(ClientRequest.indexOf("%201%20") > index_min)){
+      ValSec = 1;
+      }
+    if ((ClientRequest.indexOf("%20um%20")!= -1)&&(ClientRequest.indexOf("%20um%20") < index_s)&&(ClientRequest.indexOf("%20um%20") > index_min)){
+      ValSec = 1;
+      }
+    if ((ClientRequest.indexOf("%202%20")!= -1)&&(ClientRequest.indexOf("%202%20") < index_s)&&(ClientRequest.indexOf("%202%20") > index_min)){
+      ValSec = 2;
+      }
+    if ((ClientRequest.indexOf("%20dois%20")!= -1)&&(ClientRequest.indexOf("%20dois%20") < index_s)&&(ClientRequest.indexOf("%20dois%20") > index_min)){
+      ValSec = 2;
+      }
+    if ((ClientRequest.indexOf("%203%20")!= -1)&&(ClientRequest.indexOf("%203%20") < index_s)&&(ClientRequest.indexOf("%203%20") > index_min)){
+      ValSec = 3;
+      }
+   
+    if ((ClientRequest.indexOf("%20tr%C3%AAs%20")!= -1)&&(ClientRequest.indexOf("%20tr%C3%AAs%20") < index_s)&&(ClientRequest.indexOf("%20tr%C3%AAs%20") > index_min)){
+      ValSec = 3;
+      }
+    if ((ClientRequest.indexOf("%204%20")!= -1)&&(ClientRequest.indexOf("%204%20") < index_s)&&(ClientRequest.indexOf("%204%20") > index_min)){
+      ValSec = 4;
+      }
+    if ((ClientRequest.indexOf("%20quatro%20")!= -1)&&(ClientRequest.indexOf("%20quatro%20") < index_s)&&(ClientRequest.indexOf("%20quatro%20") > index_min)){
+      ValSec = 4;
+      }
+    if ((ClientRequest.indexOf("%205%20")!= -1)&&(ClientRequest.indexOf("%205%20") < index_s)&&(ClientRequest.indexOf("%205%20") > index_min)){
+      ValSec = 5;
+      }
+    if ((ClientRequest.indexOf("%20cinco%20")!= -1)&&(ClientRequest.indexOf("%20cinco%20") < index_s)&&(ClientRequest.indexOf("%20cinco%20") > index_min)){
+      ValSec = 5;
+      }
+      
+    if ((ClientRequest.indexOf("%206%20")!= -1)&&(ClientRequest.indexOf("%206%20") < index_s)&&(ClientRequest.indexOf("%206%20") > index_min)){
+      ValSec = 6;
+      }
+    
+    if ((ClientRequest.indexOf("%20seis%20")!= -1)&&(ClientRequest.indexOf("%20seis%20") < index_s)&&(ClientRequest.indexOf("%20seis%20") > index_min)){
+      ValSec = 6;
+      }
+      if ((ClientRequest.indexOf("%207%20")!= -1)&&(ClientRequest.indexOf("%207%20") < index_s)&&(ClientRequest.indexOf("%207%20") > index_min)){
+      ValSec = 7;
+      }
+      if ((ClientRequest.indexOf("%20sete%20")!= -1)&&(ClientRequest.indexOf("%20sete%20") < index_s)&&(ClientRequest.indexOf("%20sete%20") > index_min)){
+      ValSec = 7;
+      }
+      if ((ClientRequest.indexOf("%208%20")!= -1)&&(ClientRequest.indexOf("%208%20") < index_s)&&(ClientRequest.indexOf("%208%20") > index_min)){
+      ValSec = 8;
+      }
+       if ((ClientRequest.indexOf("%20oito%20")!= -1)&&(ClientRequest.indexOf("%20oito%20") < index_s)&&(ClientRequest.indexOf("%20oito%20") > index_min)){
+      ValSec = 8;
+      }
+      if ((ClientRequest.indexOf("%209%20")!= -1)&&(ClientRequest.indexOf("%209%20") < index_s)&&(ClientRequest.indexOf("%209%20") > index_min)){
+      ValSec = 9;
+      }
+      if ((ClientRequest.indexOf("%20nove%20")!= -1)&&(ClientRequest.indexOf("%20nove%20") < index_s)&&(ClientRequest.indexOf("%20nove%20") > index_min)){
+      ValSec = 9;
+      }
+      if ((ClientRequest.indexOf("%2010%20")!= -1)&&(ClientRequest.indexOf("%2010%20") < index_s)&&(ClientRequest.indexOf("%2010%20") > index_min)){
+      ValSec = 10;
+      }
+       if ((ClientRequest.indexOf("%20dez%20")!= -1)&&(ClientRequest.indexOf("%20dez%20") < index_s)&&(ClientRequest.indexOf("%20dez%20") > index_min)){
+      ValSec = 10;
+      }
+      if ((ClientRequest.indexOf("%2011%20")!= -1)&&(ClientRequest.indexOf("%2011%20") < index_s)&&(ClientRequest.indexOf("%2011%20") > index_min)){
+      ValSec = 11;
+      }
+      if ((ClientRequest.indexOf("%20onze%20")!= -1)&&(ClientRequest.indexOf("%20onze%20") < index_s)&&(ClientRequest.indexOf("%20onze%20") > index_min)){
+      ValSec = 11;
+      }
+      if ((ClientRequest.indexOf("%2012%20")!= -1)&&(ClientRequest.indexOf("%2012%20") < index_s)&&(ClientRequest.indexOf("%2012%20") > index_min)){
+      ValSec = 12;
+      }
+       if ((ClientRequest.indexOf("%20doze%20")!= -1)&&(ClientRequest.indexOf("%20doze%20") < index_s)&&(ClientRequest.indexOf("%20doze%20") > index_min)){
+      ValSec = 12;
+      }
+      if ((ClientRequest.indexOf("%20treze%20")!= -1)&&(ClientRequest.indexOf("%20treze%20") < index_s)&&(ClientRequest.indexOf("%20treze%20") > index_min)){
+      ValSec = 13;
+      }
+      if ((ClientRequest.indexOf("%2013%20")!= -1)&&(ClientRequest.indexOf("%2013%20") < index_s)&&(ClientRequest.indexOf("%2013%20") > index_min)){
+      ValSec = 13;
+      }
+      if ((ClientRequest.indexOf("%2014%20")!= -1)&&(ClientRequest.indexOf("%2014%20") < index_s)&&(ClientRequest.indexOf("%2014%20") > index_min)){
+      ValSec = 14;
+      }
+       if ((ClientRequest.indexOf("%20quatorze%20")!= -1)&&(ClientRequest.indexOf("%20quatorze%20") < index_s)&&(ClientRequest.indexOf("%20quatorze%20") > index_min)){
+      ValSec = 14;
+      }
+      if ((ClientRequest.indexOf("%2015%20")!= -1)&&(ClientRequest.indexOf("%2015%20") < index_s)&&(ClientRequest.indexOf("%2015%20") > index_min)){
+      ValSec = 15;
+      }
+      if ((ClientRequest.indexOf("%20quinze%20")!= -1)&&(ClientRequest.indexOf("%20quinze%20") < index_s)&&(ClientRequest.indexOf("%20quinze%20") > index_min)){
+      ValSec = 15;
+      }
+      if ((ClientRequest.indexOf("%2016%20")!= -1)&&(ClientRequest.indexOf("%2016%20") < index_s)&&(ClientRequest.indexOf("%2016%20") > index_min)){
+      ValSec = 16;
+      }
+       if ((ClientRequest.indexOf("%20desesseis%20")!= -1)&&(ClientRequest.indexOf("%20desesseis%20") < index_s)&&(ClientRequest.indexOf("%20desesseis%20") > index_min)){
+      ValSec = 16;
+      }
+      if ((ClientRequest.indexOf("%2017%20")!= -1)&&(ClientRequest.indexOf("%2017%20") < index_s)&&(ClientRequest.indexOf("%2017%20") > index_min)){
+      ValSec = 17;
+      }
+      if ((ClientRequest.indexOf("%20dezessete%20")!= -1)&&(ClientRequest.indexOf("%20dezessete%20") < index_s)&&(ClientRequest.indexOf("%20dezessete%20") > index_min)){
+      ValSec = 17;
+      }
+      if ((ClientRequest.indexOf("%2018%20")!= -1)&&(ClientRequest.indexOf("%2018%20") < index_s)&&(ClientRequest.indexOf("%2018%20") > index_min)){
+      ValSec = 18;
+      }
+       if ((ClientRequest.indexOf("%20dezoito%20")!= -1)&&(ClientRequest.indexOf("%20dezoito%20") < index_s)&&(ClientRequest.indexOf("%20dezoito%20") > index_min)){
+      ValSec = 18;
+      }
+      if ((ClientRequest.indexOf("%2019%20")!= -1)&&(ClientRequest.indexOf("%2019%20") < index_s)&&(ClientRequest.indexOf("%2019%20") > index_min)){
+      ValSec = 19;
+      }
+      if ((ClientRequest.indexOf("%20dezenove%20")!= -1)&&(ClientRequest.indexOf("%20dezenove%20") < index_s)&&(ClientRequest.indexOf("%20dezenove%20") > index_min)){
+      ValSec = 19;
+      }
+      if ((ClientRequest.indexOf("%2020%20")!= -1)&&(ClientRequest.indexOf("%2020%20") < index_s)&&(ClientRequest.indexOf("%2020%20") > index_min)){
+      ValSec = 20;
+      }
+       if ((ClientRequest.indexOf("%20vinte%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20") < index_s)&&(ClientRequest.indexOf("%20vinte%20") > index_min)){
+      ValSec = 20;
+      }
+      if ((ClientRequest.indexOf("%2021%20")!= -1)&&(ClientRequest.indexOf("%2021%20") < index_s)&&(ClientRequest.indexOf("%2021%20") > index_min)){
+      ValSec = 21;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20um%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20um%20") < index_s)&&(ClientRequest.indexOf("%20vinte%20e%20um%20") > index_min)){
+      ValSec = 21;
+      }
+      if ((ClientRequest.indexOf("%2022%20")!= -1)&&(ClientRequest.indexOf("%2022%20") < index_s)&&(ClientRequest.indexOf("%2022%20") > index_min)){
+      ValSec = 22;
+      }
+       if ((ClientRequest.indexOf("%20vinte%20e%20dois%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20dois%20") < index_s)&&(ClientRequest.indexOf("%20vinte%20e%20dois%20") > index_min)){
+      ValSec = 22;
+     
+      }
+      if ((ClientRequest.indexOf("%2023%20")!= -1)&&(ClientRequest.indexOf("%2023%20") < index_s)&&(ClientRequest.indexOf("%2023%20") > index_min)){
+      ValSec = 22;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20tr%C3%AAs%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20tr%C3%AAs%20") < index_s)&&(ClientRequest.indexOf("%20vinte%20e%20tr%C3%AAs%20") > index_min)){
+      ValSec = 23;
+      }
+      if ((ClientRequest.indexOf("%2024%20")!= -1)&&(ClientRequest.indexOf("%2024%20") < index_s)&&(ClientRequest.indexOf("%2024%20") > index_min)){
+      ValSec = 24;
+      }
+       if ((ClientRequest.indexOf("%20vinte%20e%20quatro%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20quatro%20") < index_s)&&(ClientRequest.indexOf("%20vinte%20e%20quatro%20") > index_min)){
+      ValSec = 24;
+      }
+      if ((ClientRequest.indexOf("%2025%20")!= -1)&&(ClientRequest.indexOf("%2025%20") < index_s)&&(ClientRequest.indexOf("%2025%20") > index_min)){
+      ValSec = 25;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20cinco%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20cinco%20") < index_s)&&(ClientRequest.indexOf("%20vinte%20e%20cinco%20") > index_min)){
+      ValSec = 25;
+      }
+      if ((ClientRequest.indexOf("%2026%20")!= -1)&&(ClientRequest.indexOf("%2026%20") < index_s)&&(ClientRequest.indexOf("%2026%20") > index_min)){
+      ValSec = 26;
+      }
+       if ((ClientRequest.indexOf("%20vinte%20e%20seis%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20seis%20") < index_s)&&(ClientRequest.indexOf("%20vinte%20e%20seis%20") > index_min)){
+      ValSec = 26;
+      }
+      if ((ClientRequest.indexOf("%2027%20")!= -1)&&(ClientRequest.indexOf("%2027%20") < index_s)&&(ClientRequest.indexOf("%2027%20") > index_min)){
+      ValSec = 27;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20sete%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20sete%20") < index_s)&&(ClientRequest.indexOf("%20vinte%20e%20sete%20") > index_min)){
+      ValSec = 27;
+      }
+      if ((ClientRequest.indexOf("%2028%20")!= -1)&&(ClientRequest.indexOf("%2028%20") < index_s)&&(ClientRequest.indexOf("%2028%20") > index_min)){
+      ValSec = 28;
+      }
+       if ((ClientRequest.indexOf("%20vinte%20e%20oito%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20oito%20") < index_s)&&(ClientRequest.indexOf("%20vinte%20e%20oito%20") > index_min)){
+      ValSec = 28;
+      }
+      if ((ClientRequest.indexOf("%2029%20")!= -1)&&(ClientRequest.indexOf("%2029%20") < index_s)&&(ClientRequest.indexOf("%2029%20") > index_min)){
+      ValSec = 29;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20nove%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20nove%20") < index_s)&&(ClientRequest.indexOf("%20vinte%20e%20nove%20") > index_min)){
+      ValSec = 29;
+      }
+      if ((ClientRequest.indexOf("%2030%20")!= -1)&&(ClientRequest.indexOf("%2030%20") < index_s)&&(ClientRequest.indexOf("%2030%20") > index_min)){
+      ValSec = 30;
+      }
+       if ((ClientRequest.indexOf("%20trinta%20")!= -1)&&(ClientRequest.indexOf("%20trinta%20") < index_s)&&(ClientRequest.indexOf("%20trinta%20") > index_min)){
+      ValSec = 30;
+      }
+      if ((ClientRequest.indexOf("%2031%20")!= -1)&&(ClientRequest.indexOf("%2031%20") < index_s)&&(ClientRequest.indexOf("%2031%20") > index_min)){
+      ValSec = 31;
+      }
+       if ((ClientRequest.indexOf("%20trinta e um%20")!= -1)&&(ClientRequest.indexOf("%20trinta e um%20") < index_s)&&(ClientRequest.indexOf("%20trinta e um%20") > index_min)){
+      ValSec = 31;
+      }
+      if ((ClientRequest.indexOf("%2032%20")!= -1)&&(ClientRequest.indexOf("%2032%20") < index_s)&&(ClientRequest.indexOf("%2032%20") > index_min)){
+      ValSec = 32;
+      }
+      if ((ClientRequest.indexOf("%20trinta e dois%20")!= -1)&&(ClientRequest.indexOf("%20trinta e dois%20") < index_s)&&(ClientRequest.indexOf("%20trinta e dois%20") > index_min)){
+      ValSec = 32;
+      }
+      if ((ClientRequest.indexOf("%2033%20")!= -1)&&(ClientRequest.indexOf("%2033%20") < index_s)&&(ClientRequest.indexOf("%2033%20") > index_min)){
+      ValSec = 33;
+      }
+       if ((ClientRequest.indexOf("%20trinta e tr%C3%AAs%20")!= -1)&&(ClientRequest.indexOf("%20trinta e tr%C3%AAs%20") < index_s)&&(ClientRequest.indexOf("%20trinta e tr%C3%AAs%20") > index_min)){
+      ValSec = 33;
+      }
+      if ((ClientRequest.indexOf("%2034%20")!= -1)&&(ClientRequest.indexOf("%2034%20") < index_s)&&(ClientRequest.indexOf("%2034%20") > index_min)){
+      ValSec = 34;
+      }
+      if ((ClientRequest.indexOf("%20trinta e quatro%20")!= -1)&&(ClientRequest.indexOf("%20trinta e quatro%20") < index_s)&&(ClientRequest.indexOf("%20trinta e quatro%20") > index_min)){
+      ValSec = 34;
+      }
+      if ((ClientRequest.indexOf("%2035%20")!= -1)&&(ClientRequest.indexOf("%2035%20") < index_s)&&(ClientRequest.indexOf("%2035%20") > index_min)){
+      ValSec = 35;
+      }
+       if ((ClientRequest.indexOf("%20trinta e cinco%20")!= -1)&&(ClientRequest.indexOf("%20trinta e cinco%20") < index_s)&&(ClientRequest.indexOf("%20trinta e cinco%20") > index_min)){
+      ValSec = 35;
+      }
+      if ((ClientRequest.indexOf("%2036%20")!= -1)&&(ClientRequest.indexOf("%2036%20") < index_s)&&(ClientRequest.indexOf("%2036%20") > index_min)){
+      ValSec = 36;
+      }
+      if ((ClientRequest.indexOf("%20trinta e seis%20")!= -1)&&(ClientRequest.indexOf("%20trinta e seis%20") < index_s)&&(ClientRequest.indexOf("%20trinta e seis%20") > index_min)){
+      ValSec = 36;
+      }
+      if ((ClientRequest.indexOf("%2037%20")!= -1)&&(ClientRequest.indexOf("%2037%20") < index_s)&&(ClientRequest.indexOf("%2037%20") > index_min)){
+      ValSec = 37;
+      }
+       if ((ClientRequest.indexOf("%20trinta e sete%20")!= -1)&&(ClientRequest.indexOf("%20trinta e sete%20") < index_s)&&(ClientRequest.indexOf("%20trinta e sete%20") > index_min)){
+      ValSec = 37;
+      }
+      if ((ClientRequest.indexOf("%2038%20")!= -1)&&(ClientRequest.indexOf("%2038%20") < index_s)&&(ClientRequest.indexOf("%2038%20") > index_min)){
+      ValSec = 38;
+      }
+      if ((ClientRequest.indexOf("%20trinta e oito%20")!= -1)&&(ClientRequest.indexOf("%20trinta e oito%20") < index_s)&&(ClientRequest.indexOf("%20trinta e oito%20") > index_min)){
+      ValSec = 38;
+      }
+      if ((ClientRequest.indexOf("%2039%20")!= -1)&&(ClientRequest.indexOf("%2039%20") < index_s)&&(ClientRequest.indexOf("%2039%20") > index_min)){
+      ValSec = 39;
+      }
+       if ((ClientRequest.indexOf("%20trinta e nove%20")!= -1)&&(ClientRequest.indexOf("%20trinta e nove%20") < index_s)&&(ClientRequest.indexOf("%20trinta e nove%20") > index_min)){
+      ValSec = 39;
+      }
+      if ((ClientRequest.indexOf("%2040%20")!= -1)&&(ClientRequest.indexOf("%2040%20") < index_s)&&(ClientRequest.indexOf("%2040%20") > index_min)){
+      ValSec = 40;
+      }
+      if ((ClientRequest.indexOf("%20quarenta%20")!= -1)&&(ClientRequest.indexOf("%20quarenta%20") < index_s)&&(ClientRequest.indexOf("%20quarenta%20") > index_min)){
+      ValSec = 40;
+      }
+      if ((ClientRequest.indexOf("%2041%20")!= -1)&&(ClientRequest.indexOf("%2041%20") < index_s)&&(ClientRequest.indexOf("%2041%20") > index_min)){
+      ValSec = 41;
+      }
+       if ((ClientRequest.indexOf("%20quarenta e um%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e um%20") < index_s)&&(ClientRequest.indexOf("%20quarenta e um%20") > index_min)){
+      ValSec = 41;
+      }
+      if ((ClientRequest.indexOf("%2042%20")!= -1)&&(ClientRequest.indexOf("%2042%20") < index_s)&&(ClientRequest.indexOf("%2042%20") > index_min)){
+      ValSec = 42;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e dois%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e dois%20") < index_s)&&(ClientRequest.indexOf("%20quarenta e dois%20") > index_min)){
+      ValSec = 42;
+      }
+      if ((ClientRequest.indexOf("%2043%20")!= -1)&&(ClientRequest.indexOf("%2043%20") < index_s)&&(ClientRequest.indexOf("%2043%20") > index_min)){
+      ValSec = 43;
+      }
+       if ((ClientRequest.indexOf("%20quarenta e tr%C3%AAs%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e tr%C3%AAs%20") < index_s)&&(ClientRequest.indexOf("%20quarenta e tr%C3%AAs%20") > index_min)){
+      ValSec = 43;
+      }
+      if ((ClientRequest.indexOf("%2044%20")!= -1)&&(ClientRequest.indexOf("%2044%20") < index_s)&&(ClientRequest.indexOf("%2044%20") > index_min)){
+      ValSec = 44;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e quatro%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e quatro%20") < index_s)&&(ClientRequest.indexOf("%20quarenta e quatro%20") > index_min)){
+      ValSec = 44;
+      }
+      if ((ClientRequest.indexOf("%2045%20")!= -1)&&(ClientRequest.indexOf("%2045%20") < index_s)&&(ClientRequest.indexOf("%2045%20") > index_min)){
+      ValSec = 45;
+      }
+       if ((ClientRequest.indexOf("%20quarenta e cinco%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e cinco%20") < index_s)&&(ClientRequest.indexOf("%20quarenta e cinco%20") > index_min)){
+      ValSec = 45;
+      }
+      if ((ClientRequest.indexOf("%2046%20")!= -1)&&(ClientRequest.indexOf("%2046%20") < index_s)&&(ClientRequest.indexOf("%2046%20") > index_min)){
+      ValSec = 46;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e seis%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e seis%20") < index_s)&&(ClientRequest.indexOf("%20quarenta e seis%20") > index_min)){
+      ValSec = 46;
+      }
+      if ((ClientRequest.indexOf("%2047%20")!= -1)&&(ClientRequest.indexOf("%2047%20") < index_s)&&(ClientRequest.indexOf("%2047%20") > index_min)){
+      ValSec = 47;
+      }
+       if ((ClientRequest.indexOf("%20quarenta e sete%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e sete%20") < index_s)&&(ClientRequest.indexOf("%20quarenta e sete%20") > index_min)){
+      ValSec = 47;
+      }
+      if ((ClientRequest.indexOf("%2048%20")!= -1)&&(ClientRequest.indexOf("%2048%20") < index_s)&&(ClientRequest.indexOf("%2048%20") > index_min)){
+      ValSec = 48;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e oito%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e oito%20") < index_s)&&(ClientRequest.indexOf("%20quarenta e oito%20") > index_min)){
+      ValSec = 48;
+      }
+      if ((ClientRequest.indexOf("%2049%20")!= -1)&&(ClientRequest.indexOf("%2049%20") < index_s)&&(ClientRequest.indexOf("%2049%20") > index_min)){
+      ValSec = 49;
+      }
+       if ((ClientRequest.indexOf("%20quarenta e nove%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e nove%20") < index_s)&&(ClientRequest.indexOf("%20quarenta e nove%20") > index_min)){
+      ValSec = 49;
+      }
+      if ((ClientRequest.indexOf("%2050%20")!= -1)&&(ClientRequest.indexOf("%2050%20") < index_s)&&(ClientRequest.indexOf("%2050%20") > index_min)){
+      ValSec = 50;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta%20") < index_s)&&(ClientRequest.indexOf("%20cinquenta%20") > index_min)){
+      ValSec = 50;
+      }
+      if ((ClientRequest.indexOf("%2051%20")!= -1)&&(ClientRequest.indexOf("%2051%20") < index_s)&&(ClientRequest.indexOf("%2051%20") > index_min)){
+      ValSec = 51;
+      }
+       if ((ClientRequest.indexOf("%20cinquenta e um%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e um%20") < index_s)&&(ClientRequest.indexOf("%20cinquenta e um%20") > index_min)){
+      ValSec = 51;
+      }
+      if ((ClientRequest.indexOf("%2052%20")!= -1)&&(ClientRequest.indexOf("%2052%20") < index_s)&&(ClientRequest.indexOf("%2052%20") > index_min)){
+      ValSec = 52;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e dois%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e dois%20") < index_s)&&(ClientRequest.indexOf("%20cinquenta e dois%20") > index_min)){
+      ValSec = 52;
+      }
+      if ((ClientRequest.indexOf("%2053%20")!= -1)&&(ClientRequest.indexOf("%2053%20") < index_s)&&(ClientRequest.indexOf("%2053%20") > index_min)){
+      ValSec = 53;
+      }
+       if ((ClientRequest.indexOf("%20cinquenta e tr%C3%AAs%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e tr%C3%AAs%20") < index_s)&&(ClientRequest.indexOf("%20cinquenta e tr%C3%AAs%20") > index_min)){
+      ValSec = 53;
+      }
+      if ((ClientRequest.indexOf("%2054%20")!= -1)&&(ClientRequest.indexOf("%2054%20") < index_s)&&(ClientRequest.indexOf("%2054%20") > index_min)){
+      ValSec = 54;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e quatro%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e quatro%20") < index_s)&&(ClientRequest.indexOf("%20cinquenta e quatro%20") > index_min)){
+      ValSec = 54;
+      }
+      if ((ClientRequest.indexOf("%2055%20")!= -1)&&(ClientRequest.indexOf("%2055%20") < index_s)&&(ClientRequest.indexOf("%2055%20") > index_min)){
+      ValSec = 55;
+      }
+       if ((ClientRequest.indexOf("%20cinquenta e cinco%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e cinco%20") < index_s)&&(ClientRequest.indexOf("%20cinquenta e cinco%20") > index_min)){
+      ValSec = 55;
+      }
+      if ((ClientRequest.indexOf("%2056%20")!= -1)&&(ClientRequest.indexOf("%2056%20") < index_s)&&(ClientRequest.indexOf("%2056%20") > index_min)){
+      ValSec = 56;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e seis%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e seis%20") < index_s)&&(ClientRequest.indexOf("%20cinquenta e seis%20") > index_min)){
+      ValSec = 56;
+      }
+      if ((ClientRequest.indexOf("%2057%20")!= -1)&&(ClientRequest.indexOf("%2057%20") < index_s)&&(ClientRequest.indexOf("%2057%20") > index_min)){
+      ValSec = 57;
+      }
+       if ((ClientRequest.indexOf("%20cinquenta e sete%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e sete%20") < index_s)&&(ClientRequest.indexOf("%20cinquenta e sete%20") > index_min)){
+      ValSec = 57;
+      }
+      if ((ClientRequest.indexOf("%2058%20")!= -1)&&(ClientRequest.indexOf("%2058%20") < index_s)&&(ClientRequest.indexOf("%2058%20") > index_min)){
+      ValSec = 58;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e oito%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e oito%20") < index_s)&&(ClientRequest.indexOf("%20cinquenta e oito%20") > index_min)){
+      ValSec = 58;
+      }
+      if ((ClientRequest.indexOf("%2059%20")!= -1)&&(ClientRequest.indexOf("%2059%20") < index_s)&&(ClientRequest.indexOf("%2059%20") > index_min)){
+      ValSec = 59;
+      }
+       if ((ClientRequest.indexOf("%20cinquenta e nove%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e nove%20") < index_s)&&(ClientRequest.indexOf("%20cinquenta e nove%20") > index_min)){
+      ValSec = 59;
+      }
+      if ((ClientRequest.indexOf("%2060%20")!= -1)&&(ClientRequest.indexOf("%2060%20") < index_s)&&(ClientRequest.indexOf("%2060%20") > index_min)){
+      ValSec = 60;
+      }
+      if ((ClientRequest.indexOf("%20sessenta%20")!= -1)&&(ClientRequest.indexOf("%20sessenta%20") < index_s)&&(ClientRequest.indexOf("%20sessenta%20") > index_min)){
+      ValSec = 60;
+      }
+      
+      Serial.println(ClientRequest.indexOf("segundo"));
+      Serial.println(ClientRequest.indexOf("%20S%20"));
+      Serial.println(ClientRequest.indexOf("%20s%20"));
+      Serial.println(ValSec);
+    }
+
+
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+    if (index_min > 0){
+      if ((ClientRequest.indexOf("%201%20")!= -1)&&(ClientRequest.indexOf("%201%20") < index_min)){
+      ValMin = 1;
+      }
+      if ((ClientRequest.indexOf("%20um%20")!= -1)&&(ClientRequest.indexOf("%20um%20") < index_min)){
+      ValMin = 1;
+      }
+      if ((ClientRequest.indexOf("%202%20")!= -1)&&(ClientRequest.indexOf("%202%20") < index_min)){
+      ValMin = 2;
+      }
+      if ((ClientRequest.indexOf("%20dois%20")!= -1)&&(ClientRequest.indexOf("%20dois%20") < index_min)){
+      ValMin = 2;
+      }
+      if ((ClientRequest.indexOf("%203%20")!= -1)&&(ClientRequest.indexOf("%203%20") < index_min)){
+      ValMin = 3;
+      }
+      if ((ClientRequest.indexOf("%20tr%C3%AAs%20")!= -1)&&(ClientRequest.indexOf("%20tr%C3%AAs%20") < index_min)){
+      ValMin = 3;
+      }
+      if ((ClientRequest.indexOf("%204%20")!= -1)&&(ClientRequest.indexOf("%204%20") < index_min)){
+      ValMin = 4;
+      }
+      if ((ClientRequest.indexOf("%20quatro%20")!= -1)&&(ClientRequest.indexOf("%20quatro%20") < index_min)){
+      ValMin = 4;
+      }
+      if ((ClientRequest.indexOf("%205%20")!= -1)&&(ClientRequest.indexOf("%205%20") < index_min)){
+      ValMin = 5;
+      }
+      if ((ClientRequest.indexOf("%20cinco%20")!= -1)&&(ClientRequest.indexOf("%20cinco%20") < index_min)){
+      ValMin = 5;
+      }
+      if ((ClientRequest.indexOf("%206%20")!= -1)&&(ClientRequest.indexOf("%206%20") < index_min)){
+      ValMin = 6;
+      }
+      if ((ClientRequest.indexOf("%20seis%20")!= -1)&&(ClientRequest.indexOf("%20seis%20") < index_min)){
+      ValMin = 6;
+      }
+      if ((ClientRequest.indexOf("%207%20")!= -1)&&(ClientRequest.indexOf("%207%20") < index_min)){
+      ValMin = 7;
+      }
+      if ((ClientRequest.indexOf("%20sete%20")!= -1)&&(ClientRequest.indexOf("%20sete%20") < index_min)){
+      ValMin = 7;
+      }
+      if ((ClientRequest.indexOf("%208%20")!= -1)&&(ClientRequest.indexOf("%208%20") < index_min)){
+      ValMin = 8;
+      }
+      if ((ClientRequest.indexOf("%20oito%20")!= -1)&&(ClientRequest.indexOf("%20oito%20") < index_min)){
+      ValMin = 8;
+      }
+      if ((ClientRequest.indexOf("%209%20")!= -1)&&(ClientRequest.indexOf("%209%20") < index_min)){
+      ValMin = 9;
+      }
+      if ((ClientRequest.indexOf("%20nove%20")!= -1)&&(ClientRequest.indexOf("%20nove%20") < index_min)){
+      ValMin = 9;
+      }
+      if ((ClientRequest.indexOf("%2010%20")!= -1)&&(ClientRequest.indexOf("%2010%20") < index_min)){
+      ValMin = 10;
+      }
+      if ((ClientRequest.indexOf("%20dez%20")!= -1)&&(ClientRequest.indexOf("%20dez%20") < index_min)){
+      ValMin = 10;
+      }
+      if ((ClientRequest.indexOf("%2011%20")!= -1)&&(ClientRequest.indexOf("%2011%20") < index_min)){
+      ValMin = 11;
+      }
+      if ((ClientRequest.indexOf("%20onze%20")!= -1)&&(ClientRequest.indexOf("%20onze%20") < index_min)){
+      ValMin = 11;
+      }
+      if ((ClientRequest.indexOf("%2012%20")!= -1)&&(ClientRequest.indexOf("%2012%20") < index_min)){
+      ValMin = 12;
+      }
+      if ((ClientRequest.indexOf("%20doze%20")!= -1)&&(ClientRequest.indexOf("%20doze%20") < index_min)){
+      ValMin = 12;
+      }
+      if ((ClientRequest.indexOf("%20treze%20")!= -1)&&(ClientRequest.indexOf("%20treze%20") < index_min)){
+      ValMin = 13;
+      }
+      if ((ClientRequest.indexOf("%2013%20")!= -1)&&(ClientRequest.indexOf("%2013%20") < index_min)){
+      ValMin = 13;
+      }
+      if ((ClientRequest.indexOf("%2014%20")!= -1)&&(ClientRequest.indexOf("%2014%20") < index_min)){
+      ValMin = 14;
+      }
+      if ((ClientRequest.indexOf("%20quatorze%20")!= -1)&&(ClientRequest.indexOf("%20quatorze%20") < index_min)){
+      ValMin = 14;
+      }
+      if ((ClientRequest.indexOf("%2015%20")!= -1)&&(ClientRequest.indexOf("%2015%20") < index_min)){
+      ValMin = 15;
+      }
+      if ((ClientRequest.indexOf("%20quinze%20")!= -1)&&(ClientRequest.indexOf("%20quinze%20") < index_min)){
+      ValMin = 15;
+      }
+      if ((ClientRequest.indexOf("%2016%20")!= -1)&&(ClientRequest.indexOf("%2016%20") < index_min)){
+      ValMin = 16;
+      }
+      if ((ClientRequest.indexOf("%20desesseis%20")!= -1)&&(ClientRequest.indexOf("%20desesseis%20") < index_min)){
+      ValMin = 16;
+      }
+      if ((ClientRequest.indexOf("%2017%20")!= -1)&&(ClientRequest.indexOf("%2017%20") < index_min)){
+      ValMin = 17;
+      }
+      if ((ClientRequest.indexOf("%20dezessete%20")!= -1)&&(ClientRequest.indexOf("%20dezessete%20") < index_min)){
+      ValMin = 17;
+      }
+      if ((ClientRequest.indexOf("%2018%20")!= -1)&&(ClientRequest.indexOf("%2018%20") < index_min)){
+      ValMin = 18;
+      }
+      if ((ClientRequest.indexOf("%20dezoito%20")!= -1)&&(ClientRequest.indexOf("%20dezoito%20") < index_min)){
+      ValMin = 18;
+      }
+      if ((ClientRequest.indexOf("%2019%20")!= -1)&&(ClientRequest.indexOf("%2019%20") < index_min)){
+      ValMin = 19;
+      }
+      if ((ClientRequest.indexOf("%20dezenove%20")!= -1)&&(ClientRequest.indexOf("%20dezenove%20") < index_min)){
+      ValMin = 19;
+      }
+      if ((ClientRequest.indexOf("%2020%20")!= -1)&&(ClientRequest.indexOf("%2020%20") < index_min)){
+      ValMin = 20;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20") < index_min)){
+      ValMin = 20;
+      }
+      if ((ClientRequest.indexOf("%2021%20")!= -1)&&(ClientRequest.indexOf("%2021%20") < index_min)){
+      ValMin = 21;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20um%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20um%20") < index_min)){
+      ValMin = 21;
+      }
+      if ((ClientRequest.indexOf("%2022%20")!= -1)&&(ClientRequest.indexOf("%2022%20") < index_min)){
+      ValMin = 22;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20dois%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20dois%20") < index_min)){
+      ValMin = 22;
+      }
+      if ((ClientRequest.indexOf("%2023%20")!= -1)&&(ClientRequest.indexOf("%2023%20") < index_min)){
+      ValMin = 23;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20tr%C3%AAs%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20tr%C3%AAs%20") < index_min)){
+      ValMin = 23;
+      }
+      if ((ClientRequest.indexOf("%2024%20")!= -1)&&(ClientRequest.indexOf("%2024%20") < index_min)){
+      ValMin = 24;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20quatro%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20quatro%20") < index_min)){
+      ValMin = 24;
+      }
+      if ((ClientRequest.indexOf("%2025%20")!= -1)&&(ClientRequest.indexOf("%2025%20") < index_min)){
+      ValMin = 25;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20cinco%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20cinco%20") < index_min)){
+      ValMin = 25;
+      }
+      if ((ClientRequest.indexOf("%2026%20")!= -1)&&(ClientRequest.indexOf("%2026%20") < index_min)){
+      ValMin = 26;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20seis%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20seis%20") < index_min)){
+      ValMin = 26;
+      }
+      if ((ClientRequest.indexOf("%2027%20")!= -1)&&(ClientRequest.indexOf("%2027%20") < index_min)){
+      ValMin = 27;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20sete%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20sete%20") < index_min)){
+      ValMin = 27;
+      }
+      if ((ClientRequest.indexOf("%2028%20")!= -1)&&(ClientRequest.indexOf("%2028%20") < index_min)){
+      ValMin = 28;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20oito%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20oito%20") < index_min)){
+      ValMin = 28;
+      }
+      if ((ClientRequest.indexOf("%2029%20")!= -1)&&(ClientRequest.indexOf("%2029%20") < index_min)){
+      ValMin = 29;
+      }
+      if ((ClientRequest.indexOf("%20vinte%20e%20nove%20")!= -1)&&(ClientRequest.indexOf("%20vinte%20e%20nove%20") < index_min)){
+      ValMin = 29;
+      }
+      if ((ClientRequest.indexOf("%2030%20")!= -1)&&(ClientRequest.indexOf("%2030%20") < index_min)){
+      ValMin = 30;
+      }
+      if ((ClientRequest.indexOf("%20trinta%20")!= -1)&&(ClientRequest.indexOf("%20trinta%20") < index_min)){
+      ValMin = 30;
+      }
+      if ((ClientRequest.indexOf("%2031%20")!= -1)&&(ClientRequest.indexOf("%2031%20") < index_min)){
+      ValMin = 31;
+      }
+      if ((ClientRequest.indexOf("%20trinta e um%20")!= -1)&&(ClientRequest.indexOf("%20trinta e um%20") < index_min)){
+      ValMin = 31;
+      }
+      if ((ClientRequest.indexOf("%2032%20")!= -1)&&(ClientRequest.indexOf("%2032%20") < index_min)){
+      ValMin = 32;
+      }
+      if ((ClientRequest.indexOf("%20trinta e dois%20")!= -1)&&(ClientRequest.indexOf("%20trinta e dois%20") < index_min)){
+      ValMin = 32;
+      }
+      if ((ClientRequest.indexOf("%2033%20")!= -1)&&(ClientRequest.indexOf("%2033%20") < index_min)){
+      ValMin = 33;
+      }
+      if ((ClientRequest.indexOf("%20trinta e tr%C3%AAs%20")!= -1)&&(ClientRequest.indexOf("%20trinta e tr%C3%AAs%20") < index_min)){
+      ValMin = 33;
+      }
+      if ((ClientRequest.indexOf("%2034%20")!= -1)&&(ClientRequest.indexOf("%2034%20") < index_min)){
+      ValMin = 34;
+      }
+      if ((ClientRequest.indexOf("%20trinta e quatro%20")!= -1)&&(ClientRequest.indexOf("%20trinta e quatro%20") < index_min)){
+      ValMin = 34;
+      }
+      if ((ClientRequest.indexOf("%2035%20")!= -1)&&(ClientRequest.indexOf("%2035%20") < index_min)){
+      ValMin = 35;
+      }
+      if ((ClientRequest.indexOf("%20trinta e cinco%20")!= -1)&&(ClientRequest.indexOf("%20trinta e cinco%20") < index_min)){
+      ValMin = 35;
+      }
+      if ((ClientRequest.indexOf("%2036%20")!= -1)&&(ClientRequest.indexOf("%2036%20") < index_min)){
+      ValMin = 36;
+      }
+      if ((ClientRequest.indexOf("%20trinta e seis%20")!= -1)&&(ClientRequest.indexOf("%20trinta e seis%20") < index_min)){
+      ValMin = 36;
+      }
+      if ((ClientRequest.indexOf("%2037%20")!= -1)&&(ClientRequest.indexOf("%2037%20") < index_min)){
+      ValMin = 37;
+      }
+      if ((ClientRequest.indexOf("%20trinta e sete%20")!= -1)&&(ClientRequest.indexOf("%20trinta e sete%20") < index_min)){
+      ValMin = 37;
+      }
+      if ((ClientRequest.indexOf("%2038%20")!= -1)&&(ClientRequest.indexOf("%2038%20") < index_min)){
+      ValMin = 38;
+      }
+      if ((ClientRequest.indexOf("%20trinta e oito%20")!= -1)&&(ClientRequest.indexOf("%20trinta e oito%20") < index_min)){
+      ValMin = 38;
+      }
+      if ((ClientRequest.indexOf("%2039%20")!= -1)&&(ClientRequest.indexOf("%2039%20") < index_min)){
+      ValMin = 39;
+      }
+      if ((ClientRequest.indexOf("%20trinta e nove%20")!= -1)&&(ClientRequest.indexOf("%20trinta e nove%20") < index_min)){
+      ValMin = 39;
+      }
+      if ((ClientRequest.indexOf("%2040%20")!= -1)&&(ClientRequest.indexOf("%2040%20") < index_min)){
+      ValMin = 40;
+      }
+      if ((ClientRequest.indexOf("%20quarenta%20")!= -1)&&(ClientRequest.indexOf("%20quarenta%20") < index_min)){
+      ValMin = 40;
+      }
+      if ((ClientRequest.indexOf("%2041%20")!= -1)&&(ClientRequest.indexOf("%2041%20") < index_min)){
+      ValMin = 41;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e um%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e um%20") < index_min)){
+      ValMin = 41;
+      }
+      if ((ClientRequest.indexOf("%2042%20")!= -1)&&(ClientRequest.indexOf("%2042%20") < index_min)){
+      ValMin = 42;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e dois%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e dois%20") < index_min)){
+      ValMin = 42;
+      }
+      if ((ClientRequest.indexOf("%2043%20")!= -1)&&(ClientRequest.indexOf("%2043%20") < index_min)){
+      ValMin = 43;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e tr%C3%AAs%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e tr%C3%AAs%20") < index_min)){
+      ValMin = 43;
+      }
+      if ((ClientRequest.indexOf("%2044%20")!= -1)&&(ClientRequest.indexOf("%2044%20") < index_min)){
+      ValMin = 44;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e quatro%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e quatro%20") < index_min)){
+      ValMin = 44;
+      }
+      if ((ClientRequest.indexOf("%2045%20")!= -1)&&(ClientRequest.indexOf("%2045%20") < index_min)){
+      ValMin = 45;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e cinco%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e cinco%20") < index_min)){
+      ValMin = 45;
+      }
+      if ((ClientRequest.indexOf("%2046%20")!= -1)&&(ClientRequest.indexOf("%2046%20") < index_min)){
+      ValMin = 46;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e seis%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e seis%20") < index_min)){
+      ValMin = 46;
+      }
+      if ((ClientRequest.indexOf("%2047%20")!= -1)&&(ClientRequest.indexOf("%2047%20") < index_min)){
+      ValMin = 47;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e sete%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e sete%20") < index_min)){
+      ValMin = 47;
+      }
+      if ((ClientRequest.indexOf("%2048%20")!= -1)&&(ClientRequest.indexOf("%2048%20") < index_min)){
+      ValMin = 48;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e oito%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e oito%20") < index_min)){
+      ValMin = 48;
+      }
+      if ((ClientRequest.indexOf("%2049%20")!= -1)&&(ClientRequest.indexOf("%2049%20") < index_min)){
+      ValMin = 49;
+      }
+      if ((ClientRequest.indexOf("%20quarenta e nove%20")!= -1)&&(ClientRequest.indexOf("%20quarenta e nove%20") < index_min)){
+      ValMin = 49;
+      }
+      if ((ClientRequest.indexOf("%2050%20")!= -1)&&(ClientRequest.indexOf("%2050%20") < index_min)){
+      ValMin = 50;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta%20") < index_min)){
+      ValMin = 50;
+      }
+      if ((ClientRequest.indexOf("%2051%20")!= -1)&&(ClientRequest.indexOf("%2051%20") < index_min)){
+      ValMin = 51;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e um%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e um%20") < index_min)){
+      ValMin = 51;
+      }
+      if ((ClientRequest.indexOf("%2052%20")!= -1)&&(ClientRequest.indexOf("%2052%20") < index_min)){
+      ValMin = 52;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e dois%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e dois%20") < index_min)){
+      ValMin = 52;
+      }
+      if ((ClientRequest.indexOf("%2053%20")!= -1)&&(ClientRequest.indexOf("%2053%20") < index_min)){
+      ValMin = 53;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e tr%C3%AAs%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e tr%C3%AAs%20") < index_min)){
+      ValMin = 53;
+      }
+      if ((ClientRequest.indexOf("%2054%20")!= -1)&&(ClientRequest.indexOf("%2054%20") < index_min)){
+      ValMin = 54;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e quatro%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e quatro%20") < index_min)){
+      ValMin = 54;
+      }
+      if ((ClientRequest.indexOf("%2055%20")!= -1)&&(ClientRequest.indexOf("%2055%20") < index_min)){
+      ValMin = 55;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e cinco%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e cinco%20") < index_min)){
+      ValMin = 55;
+      }
+      if ((ClientRequest.indexOf("%2056%20")!= -1)&&(ClientRequest.indexOf("%2056%20") < index_min)){
+      ValMin = 56;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e seis%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e seis%20") < index_min)){
+      ValMin = 56;
+      }
+      if ((ClientRequest.indexOf("%2057%20")!= -1)&&(ClientRequest.indexOf("%2057%20") < index_min)){
+      ValMin = 57;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e sete%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e sete%20") < index_min)){
+      ValMin = 57;
+      }
+      if ((ClientRequest.indexOf("%2058%20")!= -1)&&(ClientRequest.indexOf("%2058%20") < index_min)){
+      ValMin = 58;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e oito%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e oito%20") < index_min)){
+      ValMin = 58;
+      }
+      if ((ClientRequest.indexOf("%2059%20")!= -1)&&(ClientRequest.indexOf("%2059%20") < index_min)){
+      ValMin = 59;
+      }
+      if ((ClientRequest.indexOf("%20cinquenta e nove%20")!= -1)&&(ClientRequest.indexOf("%20cinquenta e nove%20") < index_min)){
+      ValMin = 59;
+      }
+      if ((ClientRequest.indexOf("%2060%20")!= -1)&&(ClientRequest.indexOf("%2060%20") < index_min)){
+       ValMin = 60;
+      }
+      if ((ClientRequest.indexOf("%20sessenta%20")!= -1)&&(ClientRequest.indexOf("%20sessenta%20") < index_min)){
+       ValMin = 60;
+      }
+      Serial.println(ClientRequest.indexOf("minuto"));
+      Serial.println(ValMin);
+      
+      }
+
+
+// Codigo de timer com delay
+      
+//      if((ValSec>0)||(ValMin>0)){
+//        digitalWrite(ledVerde, HIGH);
+//        int tempo = (ValMin*60+ValSec)*1000; // tempo em ms
+//          Serial.println(tempo);
+//        for(int aux=0; aux<=tempo/500;aux++ ) {
+//      delay(250);
+//      //Função para ver uma nova palavra
+//      if(digitalRead(18)==true){
+//        break;
+//          }
+//        }
+//      }
+//      digitalWrite(ledVerde,LOW);
+    
+
+
+    //lógica para o acionamento do micro-ondas
+
+    int Dgt1=0,Dgt2=0,Dgt3=0,Dgt4=0;
+Serial.print("valor valmin");
+
+    Serial.println(ValMin);
+
+if ((ClientRequest.indexOf("%20auto-destrui%C3%A7%C3%A3o%20")!=-1)||(ClientRequest.indexOf("%20destrui%C3%A7%C3%A3o%20")!=-1)){
+
+    
+    Cancela();
+
+    Num1();
+    Num0();
+    Ligar();        
+    }
+
+    
+if ((ClientRequest.indexOf("%20toca%20iron%20")!= -1)||(ClientRequest.indexOf("%20toca%20Iron%20")!= -1)){
+
+
+      Cancela();
+      
+      Num6();
+      Num6();
+      Num6(); 
+      
+      }
+//-------------------------------------------------funções de alimentos -------------------------------------------------------------------------
+  if ((ClientRequest.indexOf("%20pipoca%20")!= -1)||(ClientRequest.indexOf("%20Pipoca%20")!= -1)){
+
+      Cancela();
+
+      digitalWrite(Pin3, LOW);
+      digitalWrite(Pin5, LOW);
+      delay(250);
+      digitalWrite(Pin3, HIGH);
+      digitalWrite(Pin5, HIGH);
+      delay(250);
+      
+      }
+
+       if ((ClientRequest.indexOf("%20arroz%20")!= -1)||(ClientRequest.indexOf("%20Arroz%20")!= -1)){
+
+      Cancela();
+
+      digitalWrite(Pin3, LOW);
+      digitalWrite(Pin6, LOW);
+      delay(250);
+      digitalWrite(Pin3, HIGH);
+      digitalWrite(Pin6, HIGH);
+      delay(250);
+      
+      }
+
+       if ((ClientRequest.indexOf("%20bolo%20")!= -1)||(ClientRequest.indexOf("%20Bolo%20")!= -1)){
+
+      Cancela();
+      
+      digitalWrite(Pin5, LOW);
+      digitalWrite(Pin7, LOW);
+      delay(250);
+      digitalWrite(Pin5, HIGH);
+      digitalWrite(Pin7, HIGH);
+      delay(250);
+      
+      }
+
+       if ((ClientRequest.indexOf("%20macarr%C3%A3o%20")!= -1)||(ClientRequest.indexOf("%20Macarr%C3%A3o%20")!= -1)){
+        
+       Cancela();
+
+      digitalWrite(Pin2, LOW);
+      digitalWrite(Pin5, LOW);
+      delay(250);
+      digitalWrite(Pin2, HIGH);
+      digitalWrite(Pin5, HIGH);
+      delay(250);
+      
+      }
+
+      if ((ClientRequest.indexOf("%20Brigadeiro%20")!= -1)||(ClientRequest.indexOf("%20brigadeiro%20")!= -1)){
+
+      Cancela();
+
+      digitalWrite(Pin2, LOW);
+      digitalWrite(Pin7, LOW);
+      delay(250);
+      digitalWrite(Pin2, HIGH);
+      digitalWrite(Pin7, HIGH);
+      delay(250);
+      
+      }
+
+//-------------------------------------------------Funções númericas----------------------------------------------------------------------------
+
+    if ((ClientRequest.indexOf("%20iniciar%20")!= -1)||(ClientRequest.indexOf("%20Iniciar%20")!= -1)){
+
+      Ligar();
+      
+      }
+
+    if ((ClientRequest.indexOf("%20cancela")!= -1)||(ClientRequest.indexOf("%20Cancela")!= -1)){
+
+      Cancela();
+      
+      }
+
+      if ((ClientRequest.indexOf("%20pausa%20")!= -1)||(ClientRequest.indexOf("%20Pausa%20")!= -1)){
+
+      Pausa();
+      
+      }
+    
+    if((ValMin!=0)||(ValSec!=0)){
+      
+    Dgt1 = ValMin/10;
+    Dgt2 = ValMin%10;
+    Dgt3 = ValSec/10;
+    Dgt4 = ValSec%10;
+
+    //cancela ao iniciar
+      Cancela();
+
+
+    //Digito 1 dos mínutos
+
+    switch(Dgt1){
+      case 1:
+      Num1();
+      break;
+ 
+    case 2:
+      Num2();
+      break;
+      
+    case 3:
+      Num3();
+      break; 
+      
+    case 4:
+      Num4();
+      break;
+      
+    case 5:
+      Num5();
+      break;
+      
+    case 6:
+      Num6();
+      break;
+      
+    case 7:
+      Num7();
+      break;
+      
+    case 8:
+      Num8();
+      break;
+      
+    case 9:
+      Num9();
+      break;
+      
+    case 0:
+      Num0();
+      break;
+    }
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      //Digito 2 dos minutos
+          
+     switch(Dgt2){
+      case 1:
+      Num1();
+      break;
+      
+    case 2:
+      Num2();
+      break;
+      
+    case 3:
+      Num3();
+      break;
+      
+    case 4:
+      Num4();
+      break;
+      
+    case 5:
+      Num5();
+      break;
+      
+    case 6:
+      Num6();
+      break;
+      
+    case 7:
+      Num7();
+      break;
+      
+    case 8:
+      Num8();
+      break;
+      
+    case 9:
+      Num9();
+      break;
+      
+     case 0:
+      Num0();
+      break;
+     }
+
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    //Digito 1 dos segundos
+
+    switch(Dgt3){
+      case 1:
+      Num1();
+      break;
+      
+    case 2:
+      Num2();
+      break;
+      
+    case 3:
+      Num3();
+      break;
+      
+    case 4:
+      Num4();
+      break;
+      
+    case 5:
+      Num5();
+      break;
+      
+    case 6:
+      Num6();
+      break;
+      
+    case 7:
+      Num7();
+      break;
+      
+    case 8:
+      Num8();
+      break;
+      
+    case 9:
+      Num9();
+      break;
+      
+     case 0:
+      Num0();
+      break;
+     }
+
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    //Digito 2 dos segundos
+    
+    switch(Dgt4){
+      case 1:
+      Num1();
+      break;
+      
+    case 2:
+      Num2();
+      break;
+      
+    case 3:
+      Num3();
+      break;
+      
+    case 4:
+      Num4();
+      break;
+      
+    case 5:
+      Num5();
+      break;
+      
+    case 6:
+      Num6();
+      break;
+      
+    case 7:
+      Num7();
+      break;
+      
+    case 8:
+      Num8();
+      break;
+      
+    case 9:
+      Num9();
+      break;
+      
+    case 0:
+      Num0();
+      break;
+     }
+    }
+Serial.println(Dgt1);
+Serial.println(Dgt2);
+Serial.println(Dgt3);
+Serial.println(Dgt4);
+
+     
+
+    
+    ValSec=0;
+    ValMin=0;
+    //exibe na página a palavra "OK", caso acessado por um navegador
+    //se estiver no aplicativo esta exibição não será feita
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: text/html");
+    client.println("");
+    client.println("");
+    client.println("");
+    client.println("OK");
+    client.println("");
+    client.flush();
+    client.stop();
+    delay(1);
+}
+
+void Num0(){
+      digitalWrite(Pin4, LOW);
+      digitalWrite(Pin8, LOW);
+      delay(250);
+      digitalWrite(Pin4, HIGH);
+      digitalWrite(Pin8, HIGH);
+      delay(250); 
+}
+
+void Num1(){
+      digitalWrite(Pin3, LOW);
+      digitalWrite(Pin8, LOW);
+      delay(250);
+      digitalWrite(Pin3, HIGH);
+      digitalWrite(Pin8, HIGH);
+      delay(250);
+}
+
+void Num2(){
+      digitalWrite(Pin2, LOW);
+      digitalWrite(Pin8, LOW);
+      delay(250);
+      digitalWrite(Pin2, HIGH);
+      digitalWrite(Pin8, HIGH);
+      delay(250);
+  }
+
+  void Num3(){
+      digitalWrite(Pin8, LOW);
+      digitalWrite(Pin9, LOW);
+      delay(250);
+      digitalWrite(Pin8, HIGH);
+      digitalWrite(Pin9, HIGH);
+      delay(250);
+  } 
+
+  void Num4(){
+      digitalWrite(Pin7, LOW);
+      digitalWrite(Pin9, LOW);
+      delay(250);
+      digitalWrite(Pin7, HIGH);
+      digitalWrite(Pin9, HIGH);
+      delay(250);
+  }
+
+  void Num5(){
+      digitalWrite(Pin6, LOW);
+      digitalWrite(Pin9, LOW);
+      delay(250);
+      digitalWrite(Pin6, HIGH);
+      digitalWrite(Pin9, HIGH);
+      delay(250);
+  }
+
+  void Num6(){
+      digitalWrite(Pin5, LOW);
+      digitalWrite(Pin9, LOW);
+      delay(250);
+      digitalWrite(Pin5, HIGH);
+      digitalWrite(Pin9, HIGH);
+      delay(250);
+  }
+
+  void Num7(){
+      digitalWrite(Pin4, LOW);
+      digitalWrite(Pin9, LOW);
+      delay(250);
+      digitalWrite(Pin4, HIGH);
+      digitalWrite(Pin9, HIGH);
+      delay(250);
+  }
+
+  void Num8(){
+      digitalWrite(Pin3, LOW);
+      digitalWrite(Pin9, LOW);
+      delay(250);
+      digitalWrite(Pin3, HIGH);
+      digitalWrite(Pin9, HIGH);
+      delay(250);
+  }
+
+  void Num9(){
+      digitalWrite(Pin2, LOW);
+      digitalWrite(Pin9, LOW);
+      delay(250);
+      digitalWrite(Pin2, HIGH);
+      digitalWrite(Pin9, HIGH);
+      delay(250);
+  }
+
+  void Cancela(){
+      digitalWrite(Pin1, HIGH);
+      digitalWrite(Pin8, LOW);
+      delay(250);
+      digitalWrite(Pin1, LOW);
+      digitalWrite(Pin8, HIGH);
+      delay(250);
+      digitalWrite(Pin1, HIGH);
+      digitalWrite(Pin8, LOW);
+      delay(250);
+      digitalWrite(Pin1, LOW);
+      digitalWrite(Pin8, HIGH);
+      delay(250);
+    }
+  void Pausa(){
+      digitalWrite(Pin1, HIGH);
+      digitalWrite(Pin8, LOW);
+      delay(250);
+      digitalWrite(Pin1, LOW);
+      digitalWrite(Pin8, HIGH);
+      delay(250);
+    }
+
+  void Ligar(){
+      digitalWrite(Pin1, HIGH);
+      digitalWrite(Pin9, LOW);
+      delay(250);
+      digitalWrite(Pin1, LOW);
+      digitalWrite(Pin9, HIGH);
+      delay(250);
+    }
+  
